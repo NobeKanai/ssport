@@ -15,15 +15,19 @@ import (
 )
 
 func main() {
-	auth, user, err := ssport.FetchInfo("your imeicode")
+	info, err := ssport.FetchInfo("your imeicode") // fetch information by imeicode
 	if err != nil {
 		fmt.Printf("%v", err)
 	}
 
-	fmt.Println("token is", auth.Token)
-	fmt.Println("user id is", auth.UserID)
+	fmt.Println("user name is", info.UserInfo.User.NickName)
+	fmt.Println("user id is", info.AuthInfo.UserID)
 
-	if err := ssport.Run(auth, user); err != nil {
+	fmt.Println("last run date is", info.RecordInfo.LastResultDate)
+	fmt.Println("total race number is", info.RecordInfo.RaceNums)
+
+	// start inserting a record
+	if err := ssport.Run(info); err != nil {
 		log.Fatal(err)
 	}
 }
