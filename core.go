@@ -25,36 +25,54 @@ var (
 	ErrFailedRun = errors.New("failed to insert running record to server")
 )
 
+// Info contains all information about user
+type Info struct {
+	AuthInfo   *AuthInfo
+	UserInfo   *UserInfo
+	RecordInfo *RecordInfo
+}
+
 // FetchInfo get all information needs by user
-func FetchInfo(imeicode string) (*AuthInfo, *UserInfo, error) {
-	authInfo, err := getAuthInfo(imeicode)
+func FetchInfo(imeicode string) (*Info, error) {
+	authInfo, err := createAuth(imeicode)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	user, err := getUserInfoWithToken(authInfo.Token)
+	user, err := createUser(authInfo.Token)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return authInfo, user, nil
+	record, err := createRecord(authInfo.Token, authInfo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	info := &Info{
+		AuthInfo:   authInfo,
+		UserInfo:   user,
+		RecordInfo: record,
+	}
+
+	return info, nil
 }
 
 // Run insert a record
-func Run(auth *AuthInfo, user *UserInfo) error {
+func Run(info *Info) error {
 	// check for duplicate submissions
-	if recordExists(auth.Token, auth.UserID) {
+	if recordExists(info.RecordInfo) {
 		return ErrDuplicated
 	}
 
 	// fetch run id
-	runID, err := getRunID(auth.Token, user.SchoolRun.Lengths)
+	runID, err := getRunID(info.AuthInfo.Token, info.UserInfo.SchoolRun.Lengths)
 	if err != nil {
 		return fmt.Errorf("error when get run id: %w", err)
 	}
 
 	// run it
-	if err := run(auth.Token, runID, user.SchoolRun); err != nil {
+	if err := run(info.AuthInfo.Token, runID, info.UserInfo.SchoolRun); err != nil {
 		return err
 	}
 

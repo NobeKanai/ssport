@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func getUserInfoWithToken(token string) (*UserInfo, error) {
+func createUser(token string) (*UserInfo, error) {
 	url := fmt.Sprintf("http://client3.aipao.me/api/%s/QM_Users/GS", token)
 
 	rsp, err := client.Get(url)

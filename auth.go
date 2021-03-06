@@ -12,7 +12,7 @@ type AuthInfo struct {
 	IMEICode string
 }
 
-func getAuthInfo(imeicode string) (*AuthInfo, error) {
+func createAuth(imeicode string) (*AuthInfo, error) {
 	url := "https://client4.aipao.me/api/token/QM_Users/LoginSchool?IMEICode=" + imeicode
 
 	rsp, err := client.Get(url)

@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	dateLayout = "2006年01月02日"
 	encryptKey = "xfvdmyirsg"
 )
 
@@ -35,31 +34,8 @@ func getRunID(token string, lengths int64) (string, error) {
 }
 
 // recordExists check if today's running record is existed
-func recordExists(token string, userID int64) bool {
-	url := fmt.Sprintf("https://client4.aipao.me/api/%s/QM_Runs/getResultsofValidByUser?UserId=%d&pageIndex=1&pageSize=1", token, userID)
-
-	rsp, err := client.Get(url)
-	if err != nil {
-		return false
-	}
-
-	decoder := json.NewDecoder(rsp.Body)
-
-	result := struct {
-		// Success   bool
-		ListValue []struct {
-			ResultDate string
-		}
-	}{}
-	if err := decoder.Decode(&result); err != nil {
-		return false
-	}
-
-	if len(result.ListValue) == 0 {
-		return false
-	}
-
-	date, err := time.Parse(dateLayout, result.ListValue[0].ResultDate)
+func recordExists(r *RecordInfo) bool {
+	date := r.LastResultDate
 	if now := time.Now(); now.Year() != date.Year() || now.Month() != date.Month() || now.Day() != date.Day() {
 		return false
 	}
